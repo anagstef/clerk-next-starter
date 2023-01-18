@@ -1,26 +1,34 @@
 import "/styles/globals.css";
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/nextjs";
+import { ClerkProvider, RedirectToSignIn, SignedIn, SignedOut } from '@clerk/nextjs'
+import { useRouter } from 'next/router'
 
 import Head from "next/head";
 
-import Script from "next/script";
-import Layout from "/components/Layout";
+
+const publicPages = ["/", "/sign-in/[[...index]]", "/sign-up/[[...index]]"]
 
 const MyApp = ({ Component, pageProps }) => {
-
+  const { pathname } = useRouter()
+  const isPublicPage = publicPages.includes(pathname)
   return (
     <ClerkProvider {...pageProps}>
       <Head>
         <title>Clerk + Next.js Starter</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism.css" rel="stylesheet" />
       </Head>
-      <Script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js" />
-      <Script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js" />
-      <Layout>
+      {isPublicPage ? (
           <Component {...pageProps} />
-      </Layout>
+      ) : (
+        <>
+        <SignedIn>
+          <Component {...pageProps} />
+        </SignedIn>
+        <SignedOut>
+          <RedirectToSignIn />
+        </SignedOut>
+        </>
+      )}
     </ClerkProvider>
   );
 };
